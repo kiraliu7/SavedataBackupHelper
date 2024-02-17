@@ -25,15 +25,21 @@ namespace SavedataBackup
         {
             this.DataContext = vm;
             InitializeComponent();
+            Closing += vm.OnClosing;
         }
 
         private void onOpenSavedataFile(object sender, RoutedEventArgs e)
         {
+            if (vm.CurrentGame==null)
+            {
+                MessageBox.Show("You need to add a game first");
+                return;
+            }
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.FileName = vm.SavedataFile;
             if (ofd.ShowDialog() == true)
             {
-                vm.CurrentGame.SaveDataFile = ofd.FileName;
+                vm.CurrentGame.SavedataFile = ofd.FileName;
                 vm.SavedataFile = ofd.FileName;
                 vm.SavedataTime = System.IO.File.GetLastWriteTime(ofd.FileName).ToString();
             }
@@ -41,23 +47,31 @@ namespace SavedataBackup
 
         private void onSaveBackupFile(object sender, RoutedEventArgs e)
         {
-            /*
-            //NEED savefiledialog
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.FileName = vm.BackupFile;
-            if (ofd.ShowDialog() == true)
+            if (vm.CurrentGame == null)
             {
-                vm.CurrentGame.BackupFile = ofd.FileName;
-                vm.BackupFile = ofd.FileName;
-                vm.BackupTime = System.IO.File.GetLastWriteTime(ofd.FileName).ToString();
+                MessageBox.Show("You need to add a game first");
+                return;
             }
-            */
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.FileName = new DirectoryInfo(vm.SavedataFile).Name;
+            if (sfd.ShowDialog() == true)
+            {
+                vm.CurrentGame.BackupFile = sfd.FileName;
+                vm.BackupFile = sfd.FileName;
 
+                File.Copy(vm.SavedataFile, vm.BackupFile, true);
+                vm.BackupTime = System.IO.File.GetLastWriteTime(sfd.FileName).ToString();
+            }
         }
 
         private void OnOpenSavedataLocation(object sender, RoutedEventArgs e)
         {
-            string directory = new DirectoryInfo(vm.SavedataFile).Parent.Name;
+            if (vm.CurrentGame == null)
+            {
+                MessageBox.Show("You need to add a game first");
+                return;
+            }
+            string directory = new DirectoryInfo(vm.SavedataFile).Parent.FullName;
             if (Directory.Exists(directory))
             {
                 Process.Start(Environment.GetEnvironmentVariable("WINDIR") + @"\explorer.exe", directory);
@@ -66,7 +80,12 @@ namespace SavedataBackup
 
         private void OnOpenBackupLocation(object sender, RoutedEventArgs e)
         {
-            string directory = new DirectoryInfo(vm.BackupFile).Parent.Name;
+            if (vm.CurrentGame == null)
+            {
+                MessageBox.Show("You need to add a game first");
+                return;
+            }
+            string directory = new DirectoryInfo(vm.BackupFile).Parent.FullName;
             if (Directory.Exists(directory))
             {
                 Process.Start(Environment.GetEnvironmentVariable("WINDIR") + @"\explorer.exe", directory);
@@ -98,12 +117,25 @@ namespace SavedataBackup
             if (sender is ListBox box)
             {
                 vm.CurrentGame = (GameEntry)box.SelectedItem;
+            }
+        }
 
-                vm.SavedataFile = vm.CurrentGame.SaveDataFile;
-                vm.SavedataTime = System.IO.File.GetLastWriteTime(vm.CurrentGame.SaveDataFile).ToString();
+        private void OnBackupCurrent(object sender, RoutedEventArgs e)
+        {
+            if (vm.CurrentGame != null)
+            {
+                File.Copy(vm.SavedataFile, vm.BackupFile, true);
+            }
+        }
 
-                vm.BackupFile = vm.CurrentGame.BackupFile;
-                vm.BackupTime = System.IO.File.GetLastWriteTime(vm.CurrentGame.BackupFile).ToString();
+        private void OnBackupAll(object sender, RoutedEventArgs e)
+        {
+            foreach (GameEntry game in vm.GameList)
+            {
+                if (File.Exists(game.SavedataFile) && File.Exists(game.BackupFile))
+                {
+                    File.Copy(game.SavedataFile, game.BackupFile, true);
+                }
             }
         }
     }    

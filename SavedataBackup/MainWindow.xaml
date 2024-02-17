@@ -5,11 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SavedataBackup"
         mc:Ignorable="d"
-        Title="Save Backup" Height="250" Width="450">
+        Title="Save Backup" Height="250" Width="750">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="2*" />
             <ColumnDefinition Width="3*" />
+            <ColumnDefinition Width="7*" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="1*" />
@@ -22,7 +22,7 @@
             <TextBox Text="{Binding Path=SearchString}" TextChanged="OnSearchStringChanged"/>
         </StackPanel>
 
-        <ListBox Grid.Column="0" Grid.Row="1" Margin="5,0,5,10" ItemsSource="{Binding Path=GameList}" SelectionChanged="OnSelectionChanged">
+        <ListBox Grid.Column="0" Grid.Row="1" Margin="5,0,5,10" ItemsSource="{Binding Path=GameList}" SelectionChanged="OnSelectionChanged" SelectedIndex="0">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <TextBox Text="{Binding GameName, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0"/>
@@ -60,9 +60,9 @@
             </DockPanel>
             <Label></Label>
             <DockPanel>
-                <Button Width="100" HorizontalAlignment="Left">Backup Current</Button>
+                <Button Width="100" HorizontalAlignment="Left" Click="OnBackupCurrent">Backup Current</Button>
                 <Separator Width="10" Visibility="Hidden"/>
-                <Button Width="100" HorizontalAlignment="Left">Backup ALL</Button>
+                <Button Width="100" HorizontalAlignment="Left" Click="OnBackupAll">Backup ALL</Button>
             </DockPanel>
         </StackPanel>
     </Grid>
